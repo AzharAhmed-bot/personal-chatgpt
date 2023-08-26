@@ -10,23 +10,43 @@ export default function Saver() {
   const [note, setNote] = useState("");
   const [saveNotes, setSaveNotes] = useState([]);
 
+  // useEffect(() => {
+  //   if(isListening){
+  //       mic.start()
+  //       mic.onresult= (event)=>{
+  //           // console.log(event.results)
+  //           const transcript=Array.from(event.results)
+  //           .map((result)=>result[0])
+  //           .map((words)=>words.transcript)
+  //           .join("")
+  //           // console.log(transcript)
+  //           setNote(transcript)
+  //       }
+  //   }
+  //   else{
+  //       mic.stop()
+  //   }
+  // }, [isListening]);
   useEffect(() => {
-    if(isListening){
-        mic.start()
-        mic.onresult= (event)=>{
-            // console.log(event.results)
-            const transcript=Array.from(event.results)
-            .map((result)=>result[0])
-            .map((words)=>words.transcript)
-            .join("")
-            // console.log(transcript)
-            setNote(transcript)
-        }
+    const handleMicResult = (event) => {
+      const transcript = Array.from(event.results)
+        .map((result) => result[0])
+        .map((words) => words.transcript)
+        .join("");
+      setNote(transcript);
+    };
+
+    if (isListening) {
+      mic.addEventListener("result", handleMicResult);
+      mic.start();
+    } else {
+      mic.removeEventListener("result", handleMicResult);
+      mic.stop();
     }
-    
-    else{
-        mic.stop()
-    }
+
+    return () => {
+      mic.removeEventListener("result", handleMicResult);
+    };
   }, [isListening]);
 
   const handleSave = () => {
